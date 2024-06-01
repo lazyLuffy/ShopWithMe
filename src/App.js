@@ -1,25 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-function App() {
+import protectedRoutes from "./routes/ProtectedRoutes";
+import Main from "./layout/Main";
+import PublicRoute from "./routes/PublicRoute";
+import { useDispatch, useSelector } from "react-redux";
+import { onAuthStateChanged } from "firebase/auth";
+import { clearUser, setUser } from "./redux/authSlice";
+
+
+export default function App() {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <React.Fragment>
+      <BrowserRouter>
+          <Routes>
+            {user ? (
+              <Route path="/" element={<Main />}>
+                {protectedRoutes.map((route, index) => (
+                  <Route path={route.path} element={route.element} key={index} />
+                ))}
+              </Route>
+            ) : (
+              PublicRoute.map((route, index) => (
+                <Route path={route.path} element={route.element} key={index} />
+              ))
+            )}
+            <Route path="*" element={<h1>HEY NOT FOUND</h1>} />
+          </Routes>
+      </BrowserRouter>
+    </React.Fragment>
   );
 }
-
-export default App;
